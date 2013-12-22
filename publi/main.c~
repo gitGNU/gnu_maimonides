@@ -1,0 +1,44 @@
+#include <gtk/gtk.h>
+#include <cairo.h>
+#include <time.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <dirent.h>
+
+#include "../common/globales.h"
+#include "../common/pi_xml_parser.h"
+//PUBLICISTA 
+
+int main (int argc, char * argv[])
+{
+  /* int i;
+  int ret;
+  struct imagen* image_index;
+  struct pista* audios_index, *videos_index;
+
+  //xml config creation/openning*/
+  printf("INFO: starting\n");
+  /*  printf("INFO: carga USB\n");
+  ret = carga_usb(); 
+  printf("DEBUG: loading usb returns %d \n",ret);
+  //cargar_recursos_biblioteca(XML_MODE);
+  printf("INFO: lectura del archivo XML \n");
+  cargar_XML_biblioteca(XML_MODE,&image_index,&audios_index,&videos_index);
+  */
+  iDebug = 0;
+  mode = IMAGES_SOUND;
+  main_win(IMAGES_SOUND);
+  /*
+  if(image_index!=NULL)
+    free(image_index);
+  if(audios_index!=NULL)
+    free(audios_index);
+  if(videos_index!=NULL)
+  free(videos_index);*/
+  xmlCleanupParser();
+  return 0;
+}
+
+

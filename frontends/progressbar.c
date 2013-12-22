@@ -1,0 +1,224 @@
+/*
+ * Maimonides Suite v1.0.11 - advertisment/information player via embedded Raspberry Pi
+ *
+ *  Copyright 2012-2013 by it's authors. 
+ *
+ *  Some rights reserved. See COPYING, AUTHORS.
+ *  This file may be used under the terms of the GNU General Public
+ *  License version 3.0 as published by the Free Software Foundation
+ *  and appearing in the file COPYING included in the packaging of
+ *  this file.
+ *
+ *  This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+ *  WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+#include <gtk/gtk.h>
+#include <cairo.h>
+#include <glib.h>
+
+#include "../backends/carga_biblioteca.h"
+#include "../common/pi_xml_parser.h"
+
+#include "../publi/main_win.h"
+#include "../confi/main_win.h"
+#include "progressbar.h"
+//#include "../confi/confi.h"
+//#include "../publi/publi.h" 
+#include "../common/globales.h"
+
+static gboolean load_done(gpointer data)
+{
+  g_source_remove(GPOINTER_TO_INT(g_object_get_data(data, "source_id")));
+  gtk_widget_destroy(GTK_WIDGET(data));
+  /* 
+   dialog = gtk_message_dialog_new(NULL,
+                                  GTK_DIALOG_DESTROY_WITH_PARENT,
+                                  GTK_MESSAGE_INFO,
+                                  GTK_BUTTONS_CLOSE,
+                                  "Operation completed!");
+   gtk_dialog_run(GTK_DIALOG(dialog));
+   gtk_widget_destroy(dialog);
+  */
+  //free(data);
+ //ONLY PI_CONF
+#ifdef CONFIGURADOR
+  init_main ();
+#endif
+#ifdef PUBLICISTA
+  actualize_textview();
+#endif
+  return FALSE;
+}
+
+static gboolean destroy_win(gpointer data)
+{
+  g_source_remove(GPOINTER_TO_INT(g_object_get_data(data, "source_id")));
+  gtk_widget_destroy(GTK_WIDGET(data));
+  /* 
+   dialog = gtk_message_dialog_new(NULL,
+                                  GTK_DIALOG_DESTROY_WITH_PARENT,
+                                  GTK_MESSAGE_INFO,
+                                  GTK_BUTTONS_CLOSE,
+                                  "Operation completed!");
+   gtk_dialog_run(GTK_DIALOG(dialog));
+   gtk_widget_destroy(dialog);
+  */
+  //free(data);
+ //ONLY PI_CONF
+#ifdef CONFIGURADOR
+  init_main ();
+#endif
+#ifdef PUBLICISTA
+  actualize_textview();
+#endif
+  return FALSE;
+}
+
+gboolean update_progress(gpointer data)
+{
+   gtk_progress_bar_pulse(GTK_PROGRESS_BAR(data));
+
+   return TRUE;
+}
+gpointer call_fscripts_FILES (gpointer data)
+{
+  int ret;
+  struct imagen* image_index = NULL;
+  struct pista* audios_index = NULL, *videos_index = NULL;
+  struct glob_settings* settings = NULL;
+
+  ret = cargar_recursos_biblioteca (XML_MODE,&image_index,&audios_index,&videos_index,&settings);
+
+  if(image_index!=NULL)
+    free(image_index);
+  if(audios_index!=NULL)
+    free(audios_index);
+  if(videos_index!=NULL)
+    free(videos_index);
+
+  ret = cargar_recursos_biblioteca (FILES_MODE,&image_index,&audios_index,&videos_index,&settings);
+  if(no_images>0)
+    {
+      if(image_index!=NULL)
+	free(image_index);
+    }
+  if(no_pistas>0)
+    {
+      if(audios_index!=NULL)
+	free(audios_index);
+    }
+  if(no_videos)
+    {
+      if(videos_index!=NULL)
+	free(videos_index);
+    }
+  if(settings!=NULL)
+    free(settings);
+  
+  g_idle_add(load_done, data);
+  return NULL;
+}
+gpointer call_fscripts_FUSB (gpointer data)
+{
+  int ret;
+  struct imagen* image_index = NULL;
+  struct pista* audios_index = NULL, *videos_index = NULL;
+  struct glob_settings* settings = NULL;
+  /*
+  ret = cargar_recursos_biblioteca (XML_MODE,&image_index,&audios_index,&videos_index,&settings);
+
+  if(image_index!=NULL)
+    free(image_index);
+  if(audios_index!=NULL)
+    free(audios_index);
+  if(videos_index!=NULL)
+    free(videos_index);
+  */
+  g_printf("INFO: Iniciando carga desde USB\n");
+  ret = carga_usb();
+
+  if(ret)//fallo cargando desde el USB
+    {
+      g_idle_add(destroy_win,data);      
+      return NULL;
+    }
+
+  ret = cargar_recursos_biblioteca (XML_MODE,&image_index,&audios_index,&videos_index,&settings);
+ 
+  if(image_index!=NULL)
+    free(image_index);
+  if(audios_index!=NULL)
+    free(audios_index);
+  if(videos_index!=NULL)
+    free(videos_index);
+   if(settings!=NULL)
+     free(settings);
+   g_idle_add(load_done,data);
+  return NULL;
+}
+gpointer call_fscripts_TUSB (gpointer data)
+{
+  
+  int ret;
+  
+  g_printf("INFO: transfiriendo al USB\n");
+  ret = guarda_usb();
+  if(ret)//fallo guardando en el USB
+   {
+      g_idle_add(destroy_win,data);      
+      return NULL;
+    }
+  g_idle_add(load_done,data);
+  
+  return NULL;
+}
+
+
+int load_biblioteca(gpointer mode)
+{
+  GtkWidget  *win,*w, *vbox;
+  guint sid;
+	g_printf("dentro del progressbar\n");
+  gint modo;
+  modo =GPOINTER_TO_INT(mode);
+  /* create the modal window which warns the user to wait */
+  win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_modal(GTK_WINDOW(win), TRUE);
+  gtk_window_set_title(GTK_WINDOW(win), "Progress");
+  gtk_window_set_position(GTK_WINDOW(win), GTK_WIN_POS_CENTER);
+  gtk_window_set_keep_above(GTK_WINDOW(win),TRUE);
+  gtk_container_set_border_width(GTK_CONTAINER(win), 12);
+  g_signal_connect(win, "delete_event", G_CALLBACK(gtk_true), NULL);
+  vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
+  gtk_widget_show(vbox);
+  /* create label */
+  w = gtk_label_new("Please wait...");
+  gtk_widget_show(w);
+  gtk_container_add(GTK_CONTAINER(vbox), w);
+  /* create progress bar */
+  w = gtk_progress_bar_new();
+  gtk_widget_show(w);
+  gtk_container_add(GTK_CONTAINER(vbox), w);
+  /* add vbox to dialog */
+  gtk_container_add(GTK_CONTAINER(win), vbox);
+  gtk_widget_show (win);
+  /* refresh the progress dialog */
+  sid = g_timeout_add(100, update_progress, w);
+  g_object_set_data(G_OBJECT(win), "source_id", GINT_TO_POINTER(sid));
+  switch(modo)
+    {
+    case(FILES_MODE)://carga local
+      g_thread_new("carga_biblioteca",call_fscripts_FILES,win);
+      break;
+    case(FUSB_MODE)://carga desde ek USB
+      g_thread_new("carga_biblioteca",call_fscripts_FUSB,win);
+      break;
+    case(TUSB_MODE)://carga al USB
+      g_thread_new("carga_biblioteca",call_fscripts_TUSB,win);
+      break;
+    default:
+      gtk_widget_destroy(GTK_WIDGET(win));
+      break;
+    }
+  return 1;
+}

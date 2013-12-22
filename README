@@ -1,0 +1,4 @@
+
+#install dependencies in linux
+
+sudo apt-get install libmagickwand-dev libxml2-dev libgstreamer0.10-dev libgtk-3-dev

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+  <tipo_de_presentacion>20</tipo_de_presentacion>
+  <no_images>1</no_images>
+  <no_videos>4</no_videos>
+  <no_audios>3</no_audios>
+  <imágenes>
+    <n1>
+      <nombre>./imagenes/1024x768.png</nombre>
+      <tiempo>1</tiempo>
+    </n1>
+  </imágenes>
+  <videos>
+    <n1>
+      <nombre>Canon_PowerShot_SD850_IS.avi</nombre>
+    </n1>
+    <n2>
+      <nombre>DSCF8582.avi</nombre>
+    </n2>
+    <n3>
+      <nombre>MVI_7029.avi</nombre>
+    </n3>
+    <n4>
+      <nombre>miss_am.avi</nombre>
+    </n4>
+  </videos>
+  <audios>
+    <n1>
+      <nombre>nueva.ogg</nombre>
+    </n1>
+    <n2>
+      <nombre>nuevax2.ogg</nombre>
+    </n2>
+    <n3>
+      <nombre>07 - Hox Vox - House of the King.mp3</nombre>
+    </n3>
+  </audios>
+</settings>
