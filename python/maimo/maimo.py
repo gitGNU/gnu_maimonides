@@ -12,14 +12,14 @@ import gui.loading
 
 
 class Maimoglade:
-	def onDeleteWindow(self, *args):
+	def onDeleteWindow(self, *args):		
 		Gtk.main_quit(*args)
 
 	def onButtonPressed(self, button2):
 		dialog = gui.loading.DlgLoading()
-		dialog.run()
-        	print("Hello World")
-		
+		dialog.show()
+        	print("Hello World")	
+				
 
 store = Gtk.ListStore(str)
 store.append(['hello'])
