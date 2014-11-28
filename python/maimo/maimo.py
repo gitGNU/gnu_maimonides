@@ -11,15 +11,15 @@ import gui.loading
 
 
 
-class Maimoglade:
-	def onDeleteWindow(self, *args):		
-		Gtk.main_quit(*args)
+class Maimoglade(Gtk.Window):
+    def onButtonPressed(self, button2):
+        dialog = gui.loading.DlgLoading(self)
+        response = dialog.window.run()
 
-	def onButtonPressed(self, button2):
-		dialog = gui.loading.DlgLoading()
-		dialog.show()
-        	print("Hello World")	
-				
+        if response == Gtk.ResponseType.OK:
+            print("carga completada")
+        elif response == Gtk.ResponseType.CANCEL:
+            print("carga cancelada")
 
 store = Gtk.ListStore(str)
 store.append(['hello'])
@@ -29,19 +29,19 @@ builder = Gtk.Builder()
 builder.add_from_file("Maimo.glade")
 builder.connect_signals(Maimoglade())
 
-
 combo = builder.get_object("combobox1")
 combo.set_model(store)
 #combo.append_text("store")
 #combo.append("store1")
-#combo.append("store1")
+#combo.append("store1")	
 
 render = Gtk.CellRendererText()
 combo.pack_start(render, True)
 combo.add_attribute(render, 'text', 0)
 
-
 window = builder.get_object("window1")
+
+window.connect("delete-event",Gtk.main_quit)
 
 window.show_all()
 
