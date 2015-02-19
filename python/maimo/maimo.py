@@ -26,7 +26,7 @@ store.append(['hello'])
 store.append(['goodbye'])
 
 builder = Gtk.Builder()
-builder.add_from_file("Maimo.glade")
+builder.add_from_file("Maimo2.glade")
 builder.connect_signals(Maimoglade())
 
 combo = builder.get_object("combobox1")
@@ -42,6 +42,10 @@ combo.add_attribute(render, 'text', 0)
 window = builder.get_object("window1")
 
 window.connect("delete-event",Gtk.main_quit)
+
+#size
+window.set_resizable(True)
+window.maximize()
 
 window.show_all()
 
